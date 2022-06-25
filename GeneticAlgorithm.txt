@@ -1,0 +1,11 @@
+Member: 
+- 16-8-4 fully connected Neural Network (inputs = raw value of each square, outputs = direction choice)
+- fitness: game score (average of multiple?)
+- breeding: take weights randomly from parents and make 2 children
+
+Population:
+- 10000 members
+- breeding:
+    - culling: bottom 5000
+    - elitism: top 1000
+    - breed random pairs (2 children each) 4500 times until population at 10000
