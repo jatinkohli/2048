@@ -12,23 +12,22 @@ class NeuralNetwork(nn.Module):
         super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten(0, 1) # 4x4 matrix to 1x16 tensor
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(16, 8),
+            self.randomizeWeights(nn.Linear(16, 8), [-2,2]),
+            self.randomizeWeights(nn.Linear(8, 4), [-2,2]),
             nn.ReLU(),
-            nn.Linear(8, 4)
+            nn.Softmax()
         )
+
+    def randomizeWeights(self, x, bounds): # bounds = [low, high)
+        x.weight = nn.Parameter(data=((bounds[1] - bounds[0]) * torch.rand_like(x.weight, device=device) + bounds[0]))
+        return x
 
     def run(self, x):
         x = torch.as_tensor(x, dtype=torch.float, device=device)
         x = self.flatten(x)
         return self.linear_relu_stack(x)
 
-def randomizeWeights(x):
-    if type(x) == nn.Linear:
-        x.weight = nn.Parameter(data=(4 * torch.rand_like(x.weight) - 2)) # [-2,2)
-        print(x.weight)
-
 game = Game()
 model = NeuralNetwork().to(device)
 result = model.run(game.board)
-model.apply(randomizeWeights)
 print(result)
