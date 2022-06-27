@@ -11,6 +11,10 @@ class Member():
         self.dirs = ["up", "left", "down", "right"]
         self.nn = NeuralNetwork().to(device)
 
+    def run(self, board):
+        return self.dirs[torch.argmax(self.nn.run(board)).item()]
+
+    # calculate fitness by running the agent on x games and taking the mean score
     def getFitness(self, numAttempts=10):
         meanScore = 0
 
@@ -20,13 +24,13 @@ class Member():
 
             while not game.done:
                 # run nn on board and pick the desired direction, then make the move
-                game.update(self.dirs[torch.argmax(self.nn.run(game.board)).item()])
+                game.update(self.run(game.board))
 
                 # if the move did not result in the board state to change, make random moves until something happens
                 while np.array_equal(game.board, prevBoard):
                     game.update(np.random.choice(self.dirs))
 
-                prevBoard = game.board
+                prevBoard = np.copy(game.board)
         
             meanScore += game.score
 
@@ -49,11 +53,11 @@ class Member():
                         childWeights[row, weight] = selfWeights[row][weight].item() if random() < 0.5 else otherWeights[row][weight].item()
 
                         # mutate randomly, either flip sign or scale
-                        # if random() < mutationChance:
-                        #     if (random() < 0.5):
-                        #         childWeights[row, weight] *= -1 # flip sign
-                        #     else:
-                        #         childWeights[row, weight] *= random() * 3 # scale by a number from [0,3)
+                        if random() < mutationChance:
+                            if (random() < 0.5):
+                                childWeights[row, weight] *= -1 # flip sign
+                            else:
+                                childWeights[row, weight] *= random() * 3 # scale by a number from [0,3)
 
                 children[-1].nn.setWeights(index, childWeights)
 
@@ -85,11 +89,3 @@ class NeuralNetwork(torch.nn.Module):
         x = torch.as_tensor(x, dtype=torch.float, device=device)
         x = self.flatten(x)
         return self.layers(x)
-
-one = Member()
-other = Member()
-print(one.nn.layers[1].weight)
-print(one.nn.layers[1].weight)
-children = one.breed(other)
-for i in range(0,2):
-    print(children[i].nn.layers[1].weight)
