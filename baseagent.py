@@ -26,11 +26,6 @@ class BaseAgent:
                 print(f"Trial {trial}:")
 
             for i in range (0, numAttempts):
-                # if print:
-                #     if numAttempts > 10 and i % (int(numAttempts / 10)) == 0:
-                #         print(f"{100 * i / numAttempts}% done with testing")
-                #     print(i)
-
                 game = Game()
 
                 while not game.done:
